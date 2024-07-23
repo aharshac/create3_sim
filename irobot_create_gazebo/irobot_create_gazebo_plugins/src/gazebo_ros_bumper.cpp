@@ -82,7 +82,7 @@ void GazeboRosBumper::GzPoseCallback(ConstPosesStampedPtr & msg)
   // identified under the "create3" name.
   const auto i = std::find_if(
     poses.begin(), poses.end(), [](const auto & pose) -> bool {
-      std::string frame("create3");
+      std::string frame("turtlebot4");
       // Compare end of name to "create3". This works with namespaced frames.
       return std::equal(frame.rbegin(), frame.rend(), pose.name().rbegin());
     });
