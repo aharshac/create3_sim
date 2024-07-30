@@ -16,6 +16,13 @@
 
   <!-- Namespace -->
   <xacro:arg name="namespace"                    default=""/>
+  <!-- Namespace prefix for multi-robot scenario -->
+  <xacro:if value="${'$(arg namespace)' == ''}">
+    <xacro:property name="ns_prefix" value="" />
+  </xacro:if>
+  <xacro:unless value="${'$(arg namespace)' == ''}">
+    <xacro:property name="ns_prefix" value="'$(arg namespace)/'" />
+  </xacro:unless>
 
   <!-- Mechanical properties -->
   <xacro:property name="body_z_offset"           value="${-2.5*cm2m}" />
@@ -59,14 +66,14 @@
   <xacro:property name="emitter_link_name" value="halo_link"/>
   <xacro:arg name="visualize_rays" default="false"/>
   <!-- Create 3 base definition-->
-  <link name="base_link">
+  <link name="${ns_prefix}base_link">
     <visual>
       <origin xyz="0 0 ${body_z_offset + base_link_z_offset}" rpy="0 0 ${pi/2}"/>
       <geometry>
         <mesh filename="package://irobot_create_description/meshes/body_visual.dae" />
       </geometry>
     </visual>
-    <collision name="create3_base_collision">
+    <collision name="${ns_prefix}create3_base_collision">
       <origin xyz="0 0 ${body_z_offset + body_collision_z_offset  + base_link_z_offset}" rpy="0 0 ${pi/2}"/>
       <geometry>
         <cylinder length="${body_length}" radius="${body_radius}"/>
@@ -78,7 +85,7 @@
   </link>
 
   <xacro:if value="${'$(arg gazebo)' == 'ignition'}">
-    <gazebo reference="base_link">
+    <gazebo reference="${ns_prefix}base_link">
       <xacro:material_darkgray/>
     </gazebo>
   </xacro:if>
@@ -99,13 +106,13 @@
   </xacro:bumper>
 
   <!-- Wheels with mechanical wheel drop -->
-  <xacro:wheel_with_wheeldrop name="left" gazebo="$(arg gazebo)" namespace="$(arg namespace)">
+  <!-- <xacro:wheel_with_wheeldrop name="left" gazebo="$(arg gazebo)" namespace="$(arg namespace)">
     <origin xyz="0 ${distance_between_wheels/2} ${wheel_drop_z  + base_link_z_offset}" rpy="${-pi/2} 0 0"/>
   </xacro:wheel_with_wheeldrop>
 
   <xacro:wheel_with_wheeldrop name="right" gazebo="$(arg gazebo)" namespace="$(arg namespace)">
     <origin xyz="0 ${-distance_between_wheels/2} ${wheel_drop_z  + base_link_z_offset}" rpy="${-pi/2} 0 0"/>
-  </xacro:wheel_with_wheeldrop>
+  </xacro:wheel_with_wheeldrop> -->
 
   <!-- Caster wheel -->
   <xacro:caster name="front_caster" parent_link="base_link">

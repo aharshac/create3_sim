@@ -4,11 +4,11 @@
 <!-- The robot has a bumper with 5 contact sensors. The center one is
 functional, while the 4 remaining ones are created as dummy links. -->
 <xacro:macro name="dummy_bumper_zone" params="name parent_link:=base_link *origin">
-  <xacro:property name="link_name" value="${name}"/>
-  <xacro:property name="joint_name" value="${name}_joint"/>
+  <xacro:property name="link_name" value="${ns_prefix}${name}"/>
+  <xacro:property name="joint_name" value="${ns_prefix}${name}_joint"/>
 
   <joint name="${joint_name}" type="fixed">
-    <parent link="${parent_link}"/>
+    <parent link="${ns_prefix}${parent_link}"/>
     <child link="${link_name}"/>
     <xacro:insert_block name="origin"/>
   </joint>
@@ -17,11 +17,12 @@ functional, while the 4 remaining ones are created as dummy links. -->
 
 <xacro:macro name="bumper" params="name:=bumper namespace parent_link:=base_link update_rate:=62.0 gazebo visual_mesh collision_mesh
   *origin *inertial">
-  <xacro:property name="link_name" value="${name}"/>
-  <xacro:property name="joint_name" value="${name}_joint"/>
+  <xacro:property name="link_name" value="${ns_prefix}${name}"/>
+  <xacro:property name="joint_name" value="${ns_prefix}${name}_joint"/>
 
+  <!-- Macro: bumper -->
   <joint name="${joint_name}" type="fixed">
-    <parent link="${parent_link}"/>
+    <parent link="${ns_prefix}${parent_link}"/>
     <child link="${link_name}"/>
     <xacro:insert_block name="origin"/>
   </joint>
@@ -39,14 +40,14 @@ functional, while the 4 remaining ones are created as dummy links. -->
     <xacro:insert_block name="inertial"/>
   </link>
 
-  <gazebo reference="${name}" >
+  <gazebo reference="${ns_prefix}${name}" >
     <mu1>0.1</mu1>
     <mu2>0.1</mu2>
     <maxVel>0.01</maxVel>
     <minDepth>0.001</minDepth>
     <maxContacts>10</maxContacts>
     <material>Gazebo/DarkGrey</material>
-    <sensor name='${name}_contact_sensor' type='contact'>
+    <sensor name='${ns_prefix}${name}_contact_sensor' type='contact'>
       <always_on>true</always_on>
       <update_rate>${update_rate}</update_rate>
       <contact>

@@ -3,13 +3,14 @@
 
   <xacro:macro name="optical_mouse" params="name:=mouse gazebo namespace parent_link:=base_link update_rate:=62 *origin" >
 
-    <joint name="${name}_joint" type="fixed">
+    <!-- Macro: optical_mouse -->
+    <joint name="${ns_prefix}${name}_joint" type="fixed">
       <xacro:insert_block name="origin"/>
-      <parent link="${parent_link}"/>
-      <child link="${name}"/>
+      <parent link="${ns_prefix}${parent_link}"/>
+      <child link="${ns_prefix}${name}"/>
     </joint>
 
-    <link name="${name}">
+    <link name="${ns_prefix}${name}">
       <xacro:inertial_dummy />
     </link>
 
@@ -26,7 +27,7 @@
       </gazebo>
     </xacro:if>
     
-    <gazebo reference="${name}_joint" >
+    <gazebo reference="${ns_prefix}${name}_joint" >
       <preserveFixedJoint>true</preserveFixedJoint>
     </gazebo>
   </xacro:macro>

@@ -8,23 +8,24 @@
                        min_range:=${25*mm2m} max_range:=${200*mm2m}
                        visualize:=false *origin" >
 
+    <!-- Macro: ir_intensity -->
     <xacro:property name="link_name" value="ir_intensity_${name}"/>
 
-    <joint name="${link_name}_joint" type="fixed">
+    <joint name="${ns_prefix}${link_name}_joint" type="fixed">
       <xacro:insert_block name="origin" />
-      <parent link="${parent}"/>
-      <child link="${link_name}"/>
+      <parent link="${ns_prefix}${parent}"/>
+      <child link="${ns_prefix}${link_name}"/>
     </joint>
 
-    <link name="${link_name}">
+    <link name="${ns_prefix}${link_name}">
       <xacro:inertial_dummy/>
     </link>
 
-    <gazebo reference="${link_name}_joint">
+    <gazebo reference="${ns_prefix}${link_name}_joint">
       <preserveFixedJoint>true</preserveFixedJoint>
     </gazebo>
 
-    <gazebo reference="${link_name}">
+    <gazebo reference="${ns_prefix}${link_name}">
       <xacro:ray_sensor sensor_name="${link_name}" gazebo="${gazebo}" 
                       update_rate="${update_rate}" visualize="${visualize}" 
                       h_samples="5" h_res="1.0" h_min_angle="-${fov/2}" h_max_angle="${fov/2}"

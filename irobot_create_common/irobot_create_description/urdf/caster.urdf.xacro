@@ -2,17 +2,20 @@
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
 
 <xacro:macro name="caster" params="name parent_link *origin">
+  <!-- Macro: caster -->
   <xacro:include filename="$(find irobot_create_description)/urdf/common_properties.urdf.xacro"/>
 
+  <xacro:property name="link_name" value="${ns_prefix}${name}_link"/>
+  <xacro:property name="joint_name" value="${ns_prefix}${name}_joint"/>
   <xacro:property name="radius" value="${1*cm2m}" />
   <xacro:property name="mass"   value="0.01"/>
 
-  <joint name="${name}_joint" type="fixed">
-    <parent link="${parent_link}"/>
-    <child link="${name}_link"/>
+  <joint name="${joint_name}" type="fixed">
+    <parent link="${ns_prefix}${parent_link}"/>
+    <child link="${link_name}"/>
     <xacro:insert_block name="origin"/>
   </joint>
-  <link name="${name}_link">
+  <link name="${link_name}">
     <visual>
       <geometry>
         <sphere radius="${radius}"/>
@@ -28,11 +31,11 @@
     <xacro:inertial_sphere mass="${mass}" radius="${radius}"/>
   </link>
 
-  <gazebo reference="${name}_joint">
+  <gazebo reference="${joint_name}">
     <preserveFixedJoint>true</preserveFixedJoint>
   </gazebo>
 
-  <gazebo reference="${name}_link">
+  <gazebo reference="${link_name}">
     <material>Gazebo/DarkGrey</material>
     <mu1>0.1</mu1>
     <mu2>0.1</mu2>
