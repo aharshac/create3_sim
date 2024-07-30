@@ -29,7 +29,10 @@ def generate_launch_description():
         package='controller_manager',
         executable='spawner',
         namespace=namespace,  # Namespace is not pushed when used in EventHandler
-        parameters=[control_params_file],
+        parameters=[control_params_file,
+                    {"left_wheel_names": ["robot1/left_wheel_joint"]},
+                    {"right_wheel_names": ["robot1/right_wheel_joint"]},
+                    ],
         arguments=['diffdrive_controller', '-c', 'controller_manager'],
         output='screen',
     )

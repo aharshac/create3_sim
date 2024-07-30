@@ -106,13 +106,13 @@
   </xacro:bumper>
 
   <!-- Wheels with mechanical wheel drop -->
-  <!-- <xacro:wheel_with_wheeldrop name="left" gazebo="$(arg gazebo)" namespace="$(arg namespace)">
+  <xacro:wheel_with_wheeldrop name="left" gazebo="$(arg gazebo)" namespace="$(arg namespace)">
     <origin xyz="0 ${distance_between_wheels/2} ${wheel_drop_z  + base_link_z_offset}" rpy="${-pi/2} 0 0"/>
   </xacro:wheel_with_wheeldrop>
 
   <xacro:wheel_with_wheeldrop name="right" gazebo="$(arg gazebo)" namespace="$(arg namespace)">
     <origin xyz="0 ${-distance_between_wheels/2} ${wheel_drop_z  + base_link_z_offset}" rpy="${-pi/2} 0 0"/>
-  </xacro:wheel_with_wheeldrop> -->
+  </xacro:wheel_with_wheeldrop>
 
   <!-- Caster wheel -->
   <xacro:caster name="front_caster" parent_link="base_link">
