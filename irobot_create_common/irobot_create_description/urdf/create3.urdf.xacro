@@ -16,6 +16,7 @@
 
   <!-- Namespace -->
   <xacro:arg name="namespace"                    default=""/>
+  <xacro:arg name="ns_controller_config"         default=""/>
   <!-- Namespace prefix for multi-robot scenario -->
   <xacro:if value="${'$(arg namespace)' == ''}">
     <xacro:property name="ns_prefix" value="" />
@@ -127,7 +128,7 @@
   <xacro:if value="${'$(arg gazebo)' == 'classic'}">
     <gazebo>
       <plugin name="gazebo_ros2_control" filename="libgazebo_ros2_control.so">
-        <parameters>$(find irobot_create_control)/config/control.yaml</parameters>
+        <parameters>$(arg ns_controller_config)</parameters>
         <ros>
           <remapping>~/odom:=odom</remapping>
           <remapping>/tf:=tf</remapping>
@@ -142,7 +143,7 @@
   <xacro:if value="${'$(arg gazebo)' == 'ignition'}">
     <gazebo>
       <plugin filename="libign_ros2_control-system.so" name="ign_ros2_control::IgnitionROS2ControlPlugin">
-        <parameters>$(find irobot_create_control)/config/control.yaml</parameters>
+        <parameters>$(arg ns_controller_config)</parameters>
         <ros>
           <remapping>~/odom:=odom</remapping>
           <remapping>/tf:=tf</remapping>

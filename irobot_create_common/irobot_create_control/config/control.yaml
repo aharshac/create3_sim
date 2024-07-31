@@ -12,8 +12,8 @@
   diffdrive_controller:
     ros__parameters:
       use_sim_time: True
-      left_wheel_names: ["robot1/left_wheel_joint"]
-      right_wheel_names: ["robot1/right_wheel_joint"]
+      left_wheel_names: ["left_wheel_joint"]
+      right_wheel_names: ["right_wheel_joint"]
 
       wheel_separation: 0.233
       wheel_radius: 0.03575

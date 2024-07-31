@@ -5,7 +5,7 @@
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, RegisterEventHandler, GroupAction
+from launch.actions import DeclareLaunchArgument, RegisterEventHandler, GroupAction, LogInfo
 from launch.conditions import LaunchConfigurationNotEquals
 from launch.event_handlers import OnProcessExit
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
@@ -16,6 +16,8 @@ from nav2_common.launch import RewrittenYaml
 ARGUMENTS = [
     DeclareLaunchArgument('namespace', default_value='',
                           description='Robot namespace'),
+    DeclareLaunchArgument('controller_cfg', default_value='',
+                          description='Controller config'),
 ]
 
 
@@ -39,14 +41,13 @@ def generate_launch_description():
     #     ),
     #     allow_substs=True,
     # )
+    ns_controller_config = LaunchConfiguration('controller_cfg')
 
     diffdrive_controller_node = Node(
         package='controller_manager',
         executable='spawner',
         namespace=namespace,  # Namespace is not pushed when used in EventHandler
-        parameters=[control_params_file,
-                    {"left_wheel_names": "robot1/right_wheel_joint"}
-                    ],
+        parameters=[LaunchConfiguration('controller_cfg')],
         arguments=['diffdrive_controller', '-c', 'controller_manager'],
         output='screen',
     )
@@ -62,7 +63,9 @@ def generate_launch_description():
     diffdrive_controller_callback = RegisterEventHandler(
         event_handler=OnProcessExit(
             target_action=joint_state_broadcaster_spawner,
-            on_exit=[diffdrive_controller_node],
+            on_exit=[
+                     LogInfo(msg=('Control: ', ns_controller_config)),
+                     diffdrive_controller_node],
         )
     )
 
@@ -100,7 +103,7 @@ def generate_launch_description():
     )
 
     ld = LaunchDescription(ARGUMENTS)
-
+    ld.add_action(LogInfo(msg=('Control: ', ns_controller_config)))
     ld.add_action(joint_state_broadcaster_spawner)
     ld.add_action(diffdrive_controller_callback)
     # ld.add_action(tf_namespaced_odom_publisher)

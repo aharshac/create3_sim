@@ -7,8 +7,8 @@ from irobot_create_common_bringup.namespace import GetNamespacedName
 from irobot_create_common_bringup.offset import OffsetParser, RotationalOffsetX, RotationalOffsetY
 
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, GroupAction
-from launch.actions import IncludeLaunchDescription
+from launch.actions import DeclareLaunchArgument, GroupAction, SetLaunchConfiguration
+from launch.actions import IncludeLaunchDescription, OpaqueFunction, LogInfo
 from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
@@ -39,24 +39,28 @@ for pose_element in ['x', 'y', 'z', 'yaw']:
     ARGUMENTS.append(DeclareLaunchArgument(pose_element, default_value='0.0',
                      description=f'{pose_element} component of the robot pose.'))
 
-def get_namespaced_controller_joints(context):
+def get_namespaced_controller_config(context):
     pkg_create3_control = get_package_share_directory('irobot_create_control')
     namespace = LaunchConfiguration('namespace').perform(context)
 
     control_params_file = PathJoinSubstitution(
         [pkg_create3_control, 'config', 'control.yaml'])
     
-    substituted_yaml = RewrittenYaml(
-            source_file=control_params_file,
-            # root_key='diffdrive_controller',
-            param_rewrites={
-                "left_wheel_names": [namespace + "/left_wheel_joint"],
-                "right_wheel_names": [namespace + "/right_wheel_joint"]
-            },
-            convert_types=False,
-        ).perform(context)
+    if namespace != '':
+        controller_cfg = RewrittenYaml(
+                source_file=control_params_file,
+                # root_key='diffdrive_controller',
+                param_rewrites={
+                    "left_wheel_names": [namespace + "/left_wheel_joint"],
+                    "right_wheel_names": [namespace + "/right_wheel_joint"]
+                },
+                convert_types=False,
+            )
+    else:
+        controller_cfg = control_params_file
 
-    return [node1]
+    set_controller_config = SetLaunchConfiguration('controller_cfg', controller_cfg)
+    return [set_controller_config]
 
 def generate_launch_description():
 
@@ -99,6 +103,10 @@ def generate_launch_description():
 
     spawn_robot_group_action = GroupAction([
         PushRosNamespace(namespace),
+        
+        OpaqueFunction(function=get_namespaced_controller_config),
+
+        LogInfo(msg=('Spawn: ', LaunchConfiguration('controller_cfg'))),
 
         # Dock description
         IncludeLaunchDescription(
@@ -111,7 +119,10 @@ def generate_launch_description():
         # Robot description
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([robot_description_launch]),
-            launch_arguments={'gazebo': 'ignition'}.items()
+            launch_arguments={
+                'gazebo': 'ignition',
+                'controller_cfg': LaunchConfiguration('controller_cfg')
+                }.items()
         ),
 
         # Spawn Create 3
@@ -155,7 +166,8 @@ def generate_launch_description():
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([create3_nodes_launch]),
             launch_arguments=[
-                ('namespace', namespace)
+                ('namespace', namespace),
+                ('controller_cfg', LaunchConfiguration('controller_cfg'))
             ]
         ),
 

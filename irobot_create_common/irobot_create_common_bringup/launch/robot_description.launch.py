@@ -5,7 +5,7 @@
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
+from launch.actions import DeclareLaunchArgument, LogInfo
 from launch.substitutions import Command, PathJoinSubstitution
 from launch.substitutions.launch_configuration import LaunchConfiguration
 from launch_ros.actions import Node
@@ -21,6 +21,8 @@ ARGUMENTS = [
                           description='Enable/disable ray visualization'),
     DeclareLaunchArgument('namespace', default_value='',
                           description='Robot namespace'),
+    DeclareLaunchArgument('controller_cfg', default_value='',
+                          description='Controller config'),
 ]
 
 
@@ -30,6 +32,7 @@ def generate_launch_description():
     gazebo_simulator = LaunchConfiguration('gazebo')
     visualize_rays = LaunchConfiguration('visualize_rays')
     namespace = LaunchConfiguration('namespace')
+    ns_controller_config = LaunchConfiguration('controller_cfg')
 
     robot_state_publisher = Node(
         package='robot_state_publisher',
@@ -43,13 +46,14 @@ def generate_launch_description():
                   ['xacro', ' ', xacro_file, ' ',
                    'gazebo:=', gazebo_simulator, ' ',
                    'visualize_rays:=', visualize_rays, ' ',
-                   'namespace:=', namespace]), value_type=str)},
+                   'namespace:=', namespace, ' ',
+                   'ns_controller_config:=', ns_controller_config]), value_type=str)},
         ],
         remappings=[
             ('/tf', 'tf'),
             ('/tf_static', 'tf_static')
         ],
-        ros_arguments=['--log-level', 'debug']
+        # ros_arguments=['--log-level', 'debug']
     )
 
     joint_state_publisher = Node(
@@ -68,6 +72,7 @@ def generate_launch_description():
     ld = LaunchDescription(ARGUMENTS)
 
     # Add nodes to LaunchDescription
+    ld.add_action(LogInfo(msg=('Robot: ', LaunchConfiguration('controller_cfg'))))
     ld.add_action(joint_state_publisher)
     ld.add_action(robot_state_publisher)
 
