@@ -13,6 +13,8 @@ from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node, PushRosNamespace
+from launch_ros.descriptions import ParameterFile
+from nav2_common.launch import RewrittenYaml
 
 
 ARGUMENTS = [
@@ -37,6 +39,24 @@ for pose_element in ['x', 'y', 'z', 'yaw']:
     ARGUMENTS.append(DeclareLaunchArgument(pose_element, default_value='0.0',
                      description=f'{pose_element} component of the robot pose.'))
 
+def get_namespaced_controller_joints(context):
+    pkg_create3_control = get_package_share_directory('irobot_create_control')
+    namespace = LaunchConfiguration('namespace').perform(context)
+
+    control_params_file = PathJoinSubstitution(
+        [pkg_create3_control, 'config', 'control.yaml'])
+    
+    substituted_yaml = RewrittenYaml(
+            source_file=control_params_file,
+            # root_key='diffdrive_controller',
+            param_rewrites={
+                "left_wheel_names": [namespace + "/left_wheel_joint"],
+                "right_wheel_names": [namespace + "/right_wheel_joint"]
+            },
+            convert_types=False,
+        ).perform(context)
+
+    return [node1]
 
 def generate_launch_description():
 

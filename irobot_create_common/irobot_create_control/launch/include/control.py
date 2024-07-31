@@ -5,11 +5,13 @@
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, RegisterEventHandler
+from launch.actions import DeclareLaunchArgument, RegisterEventHandler, GroupAction
 from launch.conditions import LaunchConfigurationNotEquals
 from launch.event_handlers import OnProcessExit
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
-from launch_ros.actions import Node
+from launch_ros.actions import Node, PushRosNamespace, SetParameter, SetParametersFromFile
+from launch_ros.descriptions import ParameterFile
+from nav2_common.launch import RewrittenYaml
 
 ARGUMENTS = [
     DeclareLaunchArgument('namespace', default_value='',
@@ -24,14 +26,26 @@ def generate_launch_description():
 
     control_params_file = PathJoinSubstitution(
         [pkg_create3_control, 'config', 'control.yaml'])
+    
+    # configured_params = ParameterFile(
+    #     RewrittenYaml(
+    #         source_file=control_params_file,
+    #         # root_key='diffdrive_controller',
+    #         param_rewrites={
+    #             "left_wheel_names": ["robot1/left_wheel_joint"],
+    #             "right_wheel_names": ("robot1/right_wheel_joint")
+    #         },
+    #         convert_types=False,
+    #     ),
+    #     allow_substs=True,
+    # )
 
     diffdrive_controller_node = Node(
         package='controller_manager',
         executable='spawner',
         namespace=namespace,  # Namespace is not pushed when used in EventHandler
         parameters=[control_params_file,
-                    {"left_wheel_names": ["robot1/left_wheel_joint"]},
-                    {"right_wheel_names": ["robot1/right_wheel_joint"]},
+                    {"left_wheel_names": "robot1/right_wheel_joint"}
                     ],
         arguments=['diffdrive_controller', '-c', 'controller_manager'],
         output='screen',
