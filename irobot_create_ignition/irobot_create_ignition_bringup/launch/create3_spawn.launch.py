@@ -1,5 +1,7 @@
 # Copyright 2021 Clearpath Robotics, Inc.
 # @author Roni Kreinin (rkreinin@clearpathrobotics.com)
+import tempfile
+import yaml
 
 from ament_index_python.packages import get_package_share_directory
 
@@ -13,8 +15,6 @@ from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node, PushRosNamespace
-from launch_ros.descriptions import ParameterFile
-from nav2_common.launch import RewrittenYaml
 
 
 ARGUMENTS = [
@@ -39,23 +39,24 @@ for pose_element in ['x', 'y', 'z', 'yaw']:
     ARGUMENTS.append(DeclareLaunchArgument(pose_element, default_value='0.0',
                      description=f'{pose_element} component of the robot pose.'))
 
+def rewrite_yaml(yaml_path, namespace):
+    rewritten_yaml = tempfile.NamedTemporaryFile(mode='w', delete=False, prefix=f'ns_controller_cfg_{namespace}_')
+    data = yaml.safe_load(open(yaml_path, 'r'))
+    data['/**']['diffdrive_controller']['ros__parameters']['left_wheel_names'] = [f"{namespace}/left_wheel_joint"]
+    data['/**']['diffdrive_controller']['ros__parameters']['right_wheel_names'] = [f"{namespace}/right_wheel_joint"]
+    yaml.dump(data, rewritten_yaml)
+    rewritten_yaml.close()
+    return rewritten_yaml.name
+
 def get_namespaced_controller_config(context):
     pkg_create3_control = get_package_share_directory('irobot_create_control')
     namespace = LaunchConfiguration('namespace').perform(context)
 
     control_params_file = PathJoinSubstitution(
-        [pkg_create3_control, 'config', 'control.yaml'])
+        [pkg_create3_control, 'config', 'control.yaml']).perform(context)
     
     if namespace != '':
-        controller_cfg = RewrittenYaml(
-                source_file=control_params_file,
-                # root_key='diffdrive_controller',
-                param_rewrites={
-                    "left_wheel_names": [ f"{namespace}/left_wheel_joint", "" ],
-                    "right_wheel_names": [ f"{namespace}/right_wheel_joint", "" ]
-                },
-                convert_types=False,
-            )
+        controller_cfg = rewrite_yaml(control_params_file, namespace)
     else:
         controller_cfg = control_params_file
 
