@@ -51,8 +51,8 @@ def get_namespaced_controller_config(context):
                 source_file=control_params_file,
                 # root_key='diffdrive_controller',
                 param_rewrites={
-                    "left_wheel_names": [namespace + "/left_wheel_joint"],
-                    "right_wheel_names": [namespace + "/right_wheel_joint"]
+                    "left_wheel_names": [ f"{namespace}/left_wheel_joint", "" ],
+                    "right_wheel_names": [ f"{namespace}/right_wheel_joint", "" ]
                 },
                 convert_types=False,
             )
@@ -60,7 +60,10 @@ def get_namespaced_controller_config(context):
         controller_cfg = control_params_file
 
     set_controller_config = SetLaunchConfiguration('controller_cfg', controller_cfg)
-    return [set_controller_config]
+    return [
+        set_controller_config,
+        LogInfo(msg=('get_namespaced_controller_config: ', LaunchConfiguration('controller_cfg'))),
+        ]
 
 def generate_launch_description():
 
